@@ -1,50 +1,97 @@
-# Building a Remote MCP Server on Cloudflare (Without Auth)
+# AI Code Assistant - Remote MCP Server on Cloudflare
 
-This example allows you to deploy a remote MCP server that doesn't require authentication on Cloudflare Workers. 
+This is an AI-powered code assistance MCP server deployed on Cloudflare Workers. It provides intelligent tools to help analyze, improve, fix, review, and explain code using Cloudflare Workers AI.
 
-## Get started: 
+## Available Tools
 
-[![Deploy to Workers](https://deploy.workers.cloudflare.com/button)](https://deploy.workers.cloudflare.com/?url=https://github.com/cloudflare/ai/tree/main/demos/remote-mcp-authless)
+This MCP server provides 5 powerful code assistance tools:
 
-This will deploy your MCP server to a URL like: `remote-mcp-server-authless.<your-account>.workers.dev/sse`
+### 1. **analyze_code**
+Analyzes code quality and identifies issues including:
+- Potential bugs or errors
+- Security vulnerabilities
+- Performance issues
+- Code smells and anti-patterns
+- Best practice violations
 
-Alternatively, you can use the command line below to get the remote MCP Server created on your local machine:
+### 2. **improve_code**
+Suggests improvements for code with focus areas:
+- Performance optimization
+- Readability enhancement
+- Maintainability improvements
+- Overall code quality
+
+### 3. **fix_code_issues**
+Automatically fixes common code problems based on described issues.
+
+### 4. **code_review**
+Performs comprehensive code review including:
+- Overall assessment
+- Strengths and weaknesses
+- Specific recommendations
+- Security considerations
+- Quality rating (X/10)
+
+### 5. **explain_code**
+Explains what code does with three detail levels:
+- **brief**: Concise summary
+- **detailed**: Step-by-step explanations
+- **expert**: Expert-level technical depth
+
+## Get Started
+
+### Deploy to Cloudflare
+
 ```bash
-npm create cloudflare@latest -- my-mcp-server --template=cloudflare/ai/demos/remote-mcp-authless
+npm install
+npm run deploy
 ```
 
-## Customizing your MCP Server
+This will deploy your MCP server to a URL like: `remote-mcp-server.<your-account>.workers.dev/sse`
 
-To add your own [tools](https://developers.cloudflare.com/agents/model-context-protocol/tools/) to the MCP server, define each tool inside the `init()` method of `src/index.ts` using `this.server.tool(...)`. 
+## Customizing Your MCP Server
+
+To add more tools to the MCP server, define each tool inside the `init()` method of `src/index.ts` using `this.server.tool(...)`. 
 
 ## Connect to Cloudflare AI Playground
 
-You can connect to your MCP server from the Cloudflare AI Playground, which is a remote MCP client:
+You can connect to your MCP server from the Cloudflare AI Playground:
 
 1. Go to https://playground.ai.cloudflare.com/
-2. Enter your deployed MCP server URL (`remote-mcp-server-authless.<your-account>.workers.dev/sse`)
-3. You can now use your MCP tools directly from the playground!
+2. Enter your deployed MCP server URL (`remote-mcp-server.<your-account>.workers.dev/sse`)
+3. Start using the AI code assistance tools!
 
-## Connect Claude Desktop to your MCP server
+## Connect Claude Desktop to Your MCP Server
 
-You can also connect to your remote MCP server from local MCP clients, by using the [mcp-remote proxy](https://www.npmjs.com/package/mcp-remote). 
+You can connect to your remote MCP server from Claude Desktop using the [mcp-remote proxy](https://www.npmjs.com/package/mcp-remote).
 
-To connect to your MCP server from Claude Desktop, follow [Anthropic's Quickstart](https://modelcontextprotocol.io/quickstart/user) and within Claude Desktop go to Settings > Developer > Edit Config.
-
-Update with this configuration:
+1. Open Claude Desktop
+2. Go to Settings > Developer > Edit Config
+3. Add this configuration:
 
 ```json
 {
   "mcpServers": {
-    "calculator": {
+    "ai-code-assistant": {
       "command": "npx",
       "args": [
         "mcp-remote",
-        "http://localhost:8787/sse"  // or remote-mcp-server-authless.your-account.workers.dev/sse
+        "https://remote-mcp-server.<your-account>.workers.dev/sse"
       ]
     }
   }
 }
 ```
 
-Restart Claude and you should see the tools become available. 
+4. Restart Claude Desktop
+5. Your AI code assistance tools will be available!
+
+## Example Usage
+
+Once connected, you can use tools like:
+
+- "Analyze this Python function for potential issues"
+- "Improve this JavaScript code for better performance"
+- "Review this TypeScript class and rate it"
+- "Explain what this code does in detail"
+- "Fix the null pointer issues in this code" 
