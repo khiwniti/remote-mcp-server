@@ -1,0 +1,9 @@
+name = "remote-mcp-server"
+main = "src/index.ts"
+compatibility_date = "2024-01-01"
+
+# KV namespace for memory storage
+[[kv_namespaces]]
+binding = "MEMORY_KV"
+id = "memory_kv_namespace"
+preview_id = "memory_kv_namespace_preview"
