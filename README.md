@@ -4,7 +4,7 @@ This example allows you to deploy a remote MCP server that doesn't require authe
 
 ## Available Tools
 
-This MCP server includes **50+ tools** across the following categories:
+This MCP server includes **39 tools** across the following categories:
 
 ### Calculator Tools (2 tools)
 - `add` - Simple addition of two numbers
