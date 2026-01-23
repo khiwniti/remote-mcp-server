@@ -794,6 +794,681 @@ export class MyMCP extends McpAgent {
 				}
 			},
 		);
+
+		// ============================================
+		// ENCODING / DECODING TOOLS
+		// ============================================
+
+		// Base64 encode
+		this.server.tool(
+			"base64_encode",
+			{
+				text: z.string().describe("Text to encode to base64"),
+			},
+			async ({ text }) => {
+				try {
+					const encoded = btoa(text);
+					return {
+						content: [{ type: "text", text: encoded }],
+					};
+				} catch (error) {
+					return {
+						content: [{
+							type: "text",
+							text: `Error: ${error instanceof Error ? error.message : "Failed to encode"}`
+						}],
+					};
+				}
+			},
+		);
+
+		// Base64 decode
+		this.server.tool(
+			"base64_decode",
+			{
+				encoded: z.string().describe("Base64 encoded string to decode"),
+			},
+			async ({ encoded }) => {
+				try {
+					const decoded = atob(encoded);
+					return {
+						content: [{ type: "text", text: decoded }],
+					};
+				} catch (error) {
+					return {
+						content: [{
+							type: "text",
+							text: `Error: ${error instanceof Error ? error.message : "Failed to decode"}`
+						}],
+					};
+				}
+			},
+		);
+
+		// URL encode
+		this.server.tool(
+			"url_encode",
+			{
+				text: z.string().describe("Text to URL encode"),
+			},
+			async ({ text }) => {
+				return {
+					content: [{ type: "text", text: encodeURIComponent(text) }],
+				};
+			},
+		);
+
+		// URL decode
+		this.server.tool(
+			"url_decode",
+			{
+				encoded: z.string().describe("URL encoded string to decode"),
+			},
+			async ({ encoded }) => {
+				try {
+					return {
+						content: [{ type: "text", text: decodeURIComponent(encoded) }],
+					};
+				} catch (error) {
+					return {
+						content: [{
+							type: "text",
+							text: `Error: ${error instanceof Error ? error.message : "Failed to decode"}`
+						}],
+					};
+				}
+			},
+		);
+
+		// HTML entity encode
+		this.server.tool(
+			"html_encode",
+			{
+				text: z.string().describe("Text to HTML entity encode"),
+			},
+			async ({ text }) => {
+				const encoded = text
+					.replace(/&/g, "&amp;")
+					.replace(/</g, "&lt;")
+					.replace(/>/g, "&gt;")
+					.replace(/"/g, "&quot;")
+					.replace(/'/g, "&#39;");
+				return {
+					content: [{ type: "text", text: encoded }],
+				};
+			},
+		);
+
+		// HTML entity decode
+		this.server.tool(
+			"html_decode",
+			{
+				encoded: z.string().describe("HTML entity encoded string to decode"),
+			},
+			async ({ encoded }) => {
+				const decoded = encoded
+					.replace(/&amp;/g, "&")
+					.replace(/&lt;/g, "<")
+					.replace(/&gt;/g, ">")
+					.replace(/&quot;/g, '"')
+					.replace(/&#39;/g, "'")
+					.replace(/&nbsp;/g, " ");
+				return {
+					content: [{ type: "text", text: decoded }],
+				};
+			},
+		);
+
+		// Hex encode
+		this.server.tool(
+			"hex_encode",
+			{
+				text: z.string().describe("Text to hex encode"),
+			},
+			async ({ text }) => {
+				const hex = Array.from(text)
+					.map(c => c.charCodeAt(0).toString(16).padStart(2, "0"))
+					.join("");
+				return {
+					content: [{ type: "text", text: hex }],
+				};
+			},
+		);
+
+		// Hex decode
+		this.server.tool(
+			"hex_decode",
+			{
+				hex: z.string().describe("Hex encoded string to decode"),
+			},
+			async ({ hex }) => {
+				try {
+					const text = hex.match(/.{1,2}/g)?.map(byte => String.fromCharCode(parseInt(byte, 16))).join("") || "";
+					return {
+						content: [{ type: "text", text }],
+					};
+				} catch (error) {
+					return {
+						content: [{
+							type: "text",
+							text: `Error: ${error instanceof Error ? error.message : "Failed to decode"}`
+						}],
+					};
+				}
+			},
+		);
+
+		// ============================================
+		// HASH GENERATION TOOLS
+		// ============================================
+
+		// Generate hash (SHA-256, SHA-1, SHA-512)
+		this.server.tool(
+			"generate_hash",
+			{
+				text: z.string().describe("Text to hash"),
+				algorithm: z.enum(["SHA-1", "SHA-256", "SHA-512"]).describe("Hash algorithm"),
+			},
+			async ({ text, algorithm }) => {
+				try {
+					const encoder = new TextEncoder();
+					const data = encoder.encode(text);
+					const hashBuffer = await crypto.subtle.digest(algorithm, data);
+					const hashArray = Array.from(new Uint8Array(hashBuffer));
+					const hashHex = hashArray.map(b => b.toString(16).padStart(2, "0")).join("");
+					return {
+						content: [{ type: "text", text: hashHex }],
+					};
+				} catch (error) {
+					return {
+						content: [{
+							type: "text",
+							text: `Error: ${error instanceof Error ? error.message : "Failed to generate hash"}`
+						}],
+					};
+				}
+			},
+		);
+
+		// ============================================
+		// UUID GENERATOR
+		// ============================================
+
+		// Generate UUID v4
+		this.server.tool(
+			"generate_uuid",
+			{},
+			async () => {
+				const uuid = crypto.randomUUID();
+				return {
+					content: [{ type: "text", text: uuid }],
+				};
+			},
+		);
+
+		// ============================================
+		// TEXT MANIPULATION TOOLS
+		// ============================================
+
+		// Convert text case
+		this.server.tool(
+			"convert_case",
+			{
+				text: z.string().describe("Text to convert"),
+				case_type: z.enum(["upper", "lower", "title", "camel", "snake", "kebab", "pascal"]).describe("Target case type"),
+			},
+			async ({ text, case_type }) => {
+				let result = text;
+
+				switch (case_type) {
+					case "upper":
+						result = text.toUpperCase();
+						break;
+					case "lower":
+						result = text.toLowerCase();
+						break;
+					case "title":
+						result = text.toLowerCase().replace(/\b\w/g, c => c.toUpperCase());
+						break;
+					case "camel":
+						result = text.toLowerCase().replace(/[^a-zA-Z0-9]+(.)/g, (_, chr) => chr.toUpperCase());
+						break;
+					case "snake":
+						result = text.toLowerCase().replace(/[^a-zA-Z0-9]+/g, "_").replace(/^_|_$/g, "");
+						break;
+					case "kebab":
+						result = text.toLowerCase().replace(/[^a-zA-Z0-9]+/g, "-").replace(/^-|-$/g, "");
+						break;
+					case "pascal":
+						result = text.toLowerCase().replace(/[^a-zA-Z0-9]+(.)/g, (_, chr) => chr.toUpperCase()).replace(/^(.)/, c => c.toUpperCase());
+						break;
+				}
+
+				return {
+					content: [{ type: "text", text: result }],
+				};
+			},
+		);
+
+		// Reverse text
+		this.server.tool(
+			"reverse_text",
+			{
+				text: z.string().describe("Text to reverse"),
+			},
+			async ({ text }) => {
+				const reversed = text.split("").reverse().join("");
+				return {
+					content: [{ type: "text", text: reversed }],
+				};
+			},
+		);
+
+		// Count text statistics
+		this.server.tool(
+			"text_statistics",
+			{
+				text: z.string().describe("Text to analyze"),
+			},
+			async ({ text }) => {
+				const chars = text.length;
+				const charsNoSpaces = text.replace(/\s/g, "").length;
+				const words = text.trim().split(/\s+/).filter(w => w.length > 0).length;
+				const lines = text.split("\n").length;
+				const sentences = text.split(/[.!?]+/).filter(s => s.trim().length > 0).length;
+
+				const stats = `Characters: ${chars}
+Characters (no spaces): ${charsNoSpaces}
+Words: ${words}
+Lines: ${lines}
+Sentences: ${sentences}`;
+
+				return {
+					content: [{ type: "text", text: stats }],
+				};
+			},
+		);
+
+		// Repeat text
+		this.server.tool(
+			"repeat_text",
+			{
+				text: z.string().describe("Text to repeat"),
+				count: z.number().int().min(1).max(1000).describe("Number of times to repeat (1-1000)"),
+				separator: z.string().optional().describe("Separator between repetitions (default: empty)"),
+			},
+			async ({ text, count, separator = "" }) => {
+				const repeated = Array(count).fill(text).join(separator);
+				return {
+					content: [{ type: "text", text: repeated }],
+				};
+			},
+		);
+
+		// Trim and clean text
+		this.server.tool(
+			"clean_text",
+			{
+				text: z.string().describe("Text to clean"),
+				options: z.object({
+					trim: z.boolean().optional().describe("Remove leading/trailing whitespace"),
+					remove_extra_spaces: z.boolean().optional().describe("Replace multiple spaces with single space"),
+					remove_empty_lines: z.boolean().optional().describe("Remove empty lines"),
+				}).optional(),
+			},
+			async ({ text, options = {} }) => {
+				let result = text;
+
+				if (options.trim !== false) {
+					result = result.trim();
+				}
+
+				if (options.remove_extra_spaces) {
+					result = result.replace(/  +/g, " ");
+				}
+
+				if (options.remove_empty_lines) {
+					result = result.split("\n").filter(line => line.trim().length > 0).join("\n");
+				}
+
+				return {
+					content: [{ type: "text", text: result }],
+				};
+			},
+		);
+
+		// ============================================
+		// JSON UTILITIES
+		// ============================================
+
+		// Format JSON
+		this.server.tool(
+			"format_json",
+			{
+				json: z.string().describe("JSON string to format"),
+				indent: z.number().int().min(0).max(8).optional().describe("Number of spaces for indentation (default: 2)"),
+			},
+			async ({ json, indent = 2 }) => {
+				try {
+					const parsed = JSON.parse(json);
+					const formatted = JSON.stringify(parsed, null, indent);
+					return {
+						content: [{ type: "text", text: formatted }],
+					};
+				} catch (error) {
+					return {
+						content: [{
+							type: "text",
+							text: `Error: Invalid JSON - ${error instanceof Error ? error.message : "Parse failed"}`
+						}],
+					};
+				}
+			},
+		);
+
+		// Minify JSON
+		this.server.tool(
+			"minify_json",
+			{
+				json: z.string().describe("JSON string to minify"),
+			},
+			async ({ json }) => {
+				try {
+					const parsed = JSON.parse(json);
+					const minified = JSON.stringify(parsed);
+					return {
+						content: [{ type: "text", text: minified }],
+					};
+				} catch (error) {
+					return {
+						content: [{
+							type: "text",
+							text: `Error: Invalid JSON - ${error instanceof Error ? error.message : "Parse failed"}`
+						}],
+					};
+				}
+			},
+		);
+
+		// Validate JSON
+		this.server.tool(
+			"validate_json",
+			{
+				json: z.string().describe("JSON string to validate"),
+			},
+			async ({ json }) => {
+				try {
+					JSON.parse(json);
+					return {
+						content: [{ type: "text", text: "Valid JSON" }],
+					};
+				} catch (error) {
+					return {
+						content: [{
+							type: "text",
+							text: `Invalid JSON: ${error instanceof Error ? error.message : "Parse failed"}`
+						}],
+					};
+				}
+			},
+		);
+
+		// ============================================
+		// MATH UTILITIES
+		// ============================================
+
+		// Advanced math operations
+		this.server.tool(
+			"math_operation",
+			{
+				operation: z.enum(["power", "sqrt", "log", "log10", "abs", "ceil", "floor", "round", "sin", "cos", "tan", "min", "max"]).describe("Math operation"),
+				values: z.array(z.number()).describe("Input values (1 or 2 numbers depending on operation)"),
+			},
+			async ({ operation, values }) => {
+				try {
+					let result: number;
+
+					switch (operation) {
+						case "power":
+							if (values.length !== 2) throw new Error("Power requires exactly 2 values");
+							result = Math.pow(values[0], values[1]);
+							break;
+						case "sqrt":
+							if (values.length !== 1) throw new Error("Square root requires exactly 1 value");
+							result = Math.sqrt(values[0]);
+							break;
+						case "log":
+							if (values.length !== 1) throw new Error("Natural log requires exactly 1 value");
+							result = Math.log(values[0]);
+							break;
+						case "log10":
+							if (values.length !== 1) throw new Error("Log10 requires exactly 1 value");
+							result = Math.log10(values[0]);
+							break;
+						case "abs":
+							if (values.length !== 1) throw new Error("Absolute value requires exactly 1 value");
+							result = Math.abs(values[0]);
+							break;
+						case "ceil":
+							if (values.length !== 1) throw new Error("Ceil requires exactly 1 value");
+							result = Math.ceil(values[0]);
+							break;
+						case "floor":
+							if (values.length !== 1) throw new Error("Floor requires exactly 1 value");
+							result = Math.floor(values[0]);
+							break;
+						case "round":
+							if (values.length !== 1) throw new Error("Round requires exactly 1 value");
+							result = Math.round(values[0]);
+							break;
+						case "sin":
+							if (values.length !== 1) throw new Error("Sin requires exactly 1 value");
+							result = Math.sin(values[0]);
+							break;
+						case "cos":
+							if (values.length !== 1) throw new Error("Cos requires exactly 1 value");
+							result = Math.cos(values[0]);
+							break;
+						case "tan":
+							if (values.length !== 1) throw new Error("Tan requires exactly 1 value");
+							result = Math.tan(values[0]);
+							break;
+						case "min":
+							result = Math.min(...values);
+							break;
+						case "max":
+							result = Math.max(...values);
+							break;
+						default:
+							throw new Error(`Unknown operation: ${operation}`);
+					}
+
+					return {
+						content: [{ type: "text", text: String(result) }],
+					};
+				} catch (error) {
+					return {
+						content: [{
+							type: "text",
+							text: `Error: ${error instanceof Error ? error.message : "Math operation failed"}`
+						}],
+					};
+				}
+			},
+		);
+
+		// Random number generator
+		this.server.tool(
+			"random_number",
+			{
+				min: z.number().describe("Minimum value (inclusive)"),
+				max: z.number().describe("Maximum value (inclusive)"),
+				decimals: z.number().int().min(0).max(10).optional().describe("Number of decimal places (default: 0 for integers)"),
+			},
+			async ({ min, max, decimals = 0 }) => {
+				const random = Math.random() * (max - min) + min;
+				const result = decimals > 0 ? random.toFixed(decimals) : Math.floor(random).toString();
+				return {
+					content: [{ type: "text", text: result }],
+				};
+			},
+		);
+
+		// Number formatting
+		this.server.tool(
+			"format_number",
+			{
+				number: z.number().describe("Number to format"),
+				format: z.enum(["thousands", "currency", "percentage", "binary", "octal", "hex"]).describe("Format type"),
+				currency_symbol: z.string().optional().describe("Currency symbol (default: $)"),
+			},
+			async ({ number, format, currency_symbol = "$" }) => {
+				let result: string;
+
+				switch (format) {
+					case "thousands":
+						result = number.toLocaleString("en-US");
+						break;
+					case "currency":
+						result = `${currency_symbol}${number.toFixed(2).replace(/\d(?=(\d{3})+\.)/g, "$&,")}`;
+						break;
+					case "percentage":
+						result = `${(number * 100).toFixed(2)}%`;
+						break;
+					case "binary":
+						result = Math.floor(number).toString(2);
+						break;
+					case "octal":
+						result = Math.floor(number).toString(8);
+						break;
+					case "hex":
+						result = Math.floor(number).toString(16).toUpperCase();
+						break;
+					default:
+						result = String(number);
+				}
+
+				return {
+					content: [{ type: "text", text: result }],
+				};
+			},
+		);
+
+		// ============================================
+		// REGEX TOOLS
+		// ============================================
+
+		// Test regex
+		this.server.tool(
+			"regex_test",
+			{
+				pattern: z.string().describe("Regex pattern (without delimiters)"),
+				text: z.string().describe("Text to test against"),
+				flags: z.string().optional().describe("Regex flags (e.g., 'gi' for global, case-insensitive)"),
+			},
+			async ({ pattern, text, flags = "" }) => {
+				try {
+					const regex = new RegExp(pattern, flags);
+					const matches = text.match(regex);
+
+					if (!matches || matches.length === 0) {
+						return {
+							content: [{ type: "text", text: "No matches found" }],
+						};
+					}
+
+					const result = `Found ${matches.length} match${matches.length === 1 ? "" : "es"}:\n\n${matches.map((m, i) => `${i + 1}. "${m}"`).join("\n")}`;
+
+					return {
+						content: [{ type: "text", text: result }],
+					};
+				} catch (error) {
+					return {
+						content: [{
+							type: "text",
+							text: `Error: Invalid regex - ${error instanceof Error ? error.message : "Pattern failed"}`
+						}],
+					};
+				}
+			},
+		);
+
+		// Regex replace
+		this.server.tool(
+			"regex_replace",
+			{
+				pattern: z.string().describe("Regex pattern (without delimiters)"),
+				text: z.string().describe("Text to perform replacement on"),
+				replacement: z.string().describe("Replacement string"),
+				flags: z.string().optional().describe("Regex flags (e.g., 'g' for global)"),
+			},
+			async ({ pattern, text, replacement, flags = "" }) => {
+				try {
+					const regex = new RegExp(pattern, flags);
+					const result = text.replace(regex, replacement);
+
+					return {
+						content: [{ type: "text", text: result }],
+					};
+				} catch (error) {
+					return {
+						content: [{
+							type: "text",
+							text: `Error: Invalid regex - ${error instanceof Error ? error.message : "Pattern failed"}`
+						}],
+					};
+				}
+			},
+		);
+
+		// Extract with regex
+		this.server.tool(
+			"regex_extract",
+			{
+				pattern: z.string().describe("Regex pattern with capture groups"),
+				text: z.string().describe("Text to extract from"),
+				flags: z.string().optional().describe("Regex flags"),
+			},
+			async ({ pattern, text, flags = "" }) => {
+				try {
+					const regex = new RegExp(pattern, flags);
+					const matches = [...text.matchAll(new RegExp(pattern, flags.includes("g") ? flags : flags + "g"))];
+
+					if (matches.length === 0) {
+						return {
+							content: [{ type: "text", text: "No matches found" }],
+						};
+					}
+
+					let result = `Found ${matches.length} match${matches.length === 1 ? "" : "es"}:\n\n`;
+
+					for (let i = 0; i < matches.length; i++) {
+						const match = matches[i];
+						result += `Match ${i + 1}:\n`;
+						result += `  Full: "${match[0]}"\n`;
+
+						if (match.length > 1) {
+							for (let j = 1; j < match.length; j++) {
+								result += `  Group ${j}: "${match[j]}"\n`;
+							}
+						}
+
+						result += "\n";
+					}
+
+					return {
+						content: [{ type: "text", text: result.trim() }],
+					};
+				} catch (error) {
+					return {
+						content: [{
+							type: "text",
+							text: `Error: Invalid regex - ${error instanceof Error ? error.message : "Pattern failed"}`
+						}],
+					};
+				}
+			},
+		);
 	}
 }
 

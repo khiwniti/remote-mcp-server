@@ -4,23 +4,23 @@ This example allows you to deploy a remote MCP server that doesn't require authe
 
 ## Available Tools
 
-This MCP server includes the following categories of tools:
+This MCP server includes **50+ tools** across the following categories:
 
-### Calculator Tools
+### Calculator Tools (2 tools)
 - `add` - Simple addition of two numbers
 - `calculate` - Multi-operation calculator (add, subtract, multiply, divide)
 
-### Time Tools
+### Time Tools (2 tools)
 - `get_current_time` - Get current time in any timezone using IANA timezone names
 - `convert_time` - Convert time between different timezones
 
-### Fetch Tool
+### Fetch Tool (1 tool)
 - `fetch` - Fetch web content and convert HTML to markdown
 
-### Sequential Thinking Tool
+### Sequential Thinking Tool (1 tool)
 - `sequential_thinking` - Step-by-step problem-solving with revision and branching support
 
-### Memory / Knowledge Graph Tools
+### Memory / Knowledge Graph Tools (9 tools)
 - `create_entities` - Create new entities in the knowledge graph
 - `create_relations` - Create relations between entities
 - `add_observations` - Add observations to existing entities
@@ -30,6 +30,72 @@ This MCP server includes the following categories of tools:
 - `read_graph` - View the entire knowledge graph
 - `search_nodes` - Search across entity names, types, and observations
 - `open_nodes` - Retrieve specific nodes by name
+
+### Encoding / Decoding Tools (8 tools)
+- `base64_encode` - Encode text to base64
+- `base64_decode` - Decode base64 to text
+- `url_encode` - URL encode text
+- `url_decode` - URL decode text
+- `html_encode` - HTML entity encode
+- `html_decode` - HTML entity decode
+- `hex_encode` - Encode text to hexadecimal
+- `hex_decode` - Decode hexadecimal to text
+
+### Hash Generation Tools (1 tool)
+- `generate_hash` - Generate SHA-1, SHA-256, or SHA-512 hash
+
+### UUID Generator (1 tool)
+- `generate_uuid` - Generate UUID v4
+
+### Text Manipulation Tools (5 tools)
+- `convert_case` - Convert text case (upper, lower, title, camel, snake, kebab, pascal)
+- `reverse_text` - Reverse text string
+- `text_statistics` - Count characters, words, lines, sentences
+- `repeat_text` - Repeat text with optional separator
+- `clean_text` - Trim and clean text (remove extra spaces, empty lines)
+
+### JSON Utilities (3 tools)
+- `format_json` - Format/pretty-print JSON with configurable indentation
+- `minify_json` - Minify JSON by removing whitespace
+- `validate_json` - Validate JSON syntax
+
+### Math Utilities (3 tools)
+- `math_operation` - Advanced math operations (power, sqrt, log, trig functions, min, max, etc.)
+- `random_number` - Generate random numbers with configurable precision
+- `format_number` - Format numbers (thousands separator, currency, percentage, binary, octal, hex)
+
+### Regex Tools (3 tools)
+- `regex_test` - Test regex patterns and find matches
+- `regex_replace` - Find and replace using regex
+- `regex_extract` - Extract data using regex capture groups
+
+## Adapted from Official and Community MCP Servers
+
+This server adapts tools from multiple sources:
+
+### Official MCP Servers (modelcontextprotocol/servers)
+- ✅ **Time** - Timezone operations and time conversion
+- ✅ **Fetch** - Web content fetching and HTML to markdown conversion
+- ✅ **Memory** - Knowledge graph with entities, relations, and observations
+- ✅ **Sequential Thinking** - Step-by-step problem-solving
+- ❌ **Filesystem** - Not compatible (requires local filesystem)
+- ❌ **Git** - Not compatible (requires git binary)
+
+### Community MCP Server Capabilities
+- ✅ **Text Toolkit** - Text manipulation, case conversion, statistics
+- ✅ **IT Tools MCP** - Encoding/decoding (base64, URL, HTML, hex)
+- ✅ **Hash Generators** - SHA-1, SHA-256, SHA-512
+- ✅ **UUID Generator** - UUID v4 generation
+- ✅ **JSON Tools** - JSON validation, formatting, minification
+- ✅ **Regex Tools** - Pattern testing, replacement, extraction
+- ✅ **Math Utilities** - Advanced math operations, random generation, number formatting
+
+### Why Some Servers Couldn't Be Adapted
+The following require external dependencies not available in Cloudflare Workers:
+- **Puppeteer/Selenium** - Requires browser automation (needs headless Chrome)
+- **Database servers** (PostgreSQL, SQLite, etc.) - Need database connections
+- **API-dependent servers** - Require API keys or external services
+- **File system operations** - Cloudflare Workers is serverless with no persistent filesystem
 
 ## Get started: 
 
